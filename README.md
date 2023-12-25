@@ -1,6 +1,6 @@
 #### C_experiments
 
-I'm still trying to learn C, so there may be bugs in the code.
+I'm still trying to learn C, and I find it quite difficult, so there may be bugs in the code.
 
 Right now, here is:
 
