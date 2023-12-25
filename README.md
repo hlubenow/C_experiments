@@ -1,6 +1,8 @@
 #### C_experiments
 
-I'm still trying to learn C, so beware of bugs in the code.
+I'm still trying to learn C, so there may be in the code.
+
+Right now, here is:
 
 - classemulation
 - linkedlist_example
