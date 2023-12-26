@@ -29,7 +29,7 @@
        Beyond the two border-nodes, there is NULL.
        So the list looks like this:
 
-                      NULL<-XNNNNNNNNNNNNNNNNNNX->NULL
+                      NULL-X=N=N=N=N=N=N=N=N=N=N=N=X-NULL
 
     */
 
