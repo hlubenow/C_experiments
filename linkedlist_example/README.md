@@ -10,6 +10,6 @@ In the code, I'm also using my C-emulation of classes here.
 
 Meant to be used in Linux. Enter `make` to compile.
 
-In real life, use `#include <sys/queue.h>`, see the examples [here](https://github.com/TaborKelly/queue-example).
+In real life, try using `#include <sys/queue.h>`, see the examples [here](https://github.com/TaborKelly/queue-example).
 
 License: GNU GPL 3.
