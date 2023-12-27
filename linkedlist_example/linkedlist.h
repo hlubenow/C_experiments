@@ -17,16 +17,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef generalfunctionheaders
-#define generalfunctionheaders
+#ifndef generalfunction_headers
+    #define generalfunction_headers
 
     void *mymalloc(size_t s);
 
 #endif
 
 
-#ifndef listheaders
-#define listheaders
+#ifndef list_headers
+    #define list_headers
 
     enum datatypes { type_none = -1, type_int, type_string };
 
