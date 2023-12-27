@@ -4,7 +4,7 @@
 #include "linkedlist.h"
 
 /*
-    linkedlistexample 0.1 - Trying to implement a doubly linked list.
+    linkedlistexample 0.2 - Trying to implement a doubly linked list.
 
     Copyright (C) 2023 Hauke Lubenow
 
@@ -22,6 +22,21 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+/* General functions. */
+
+void *mymalloc(size_t s) {
+    /* Just doing malloc(), and checking for success. */
+    void *p = malloc(s);
+    if (p == NULL) {
+        fprintf(stderr, "Warning: malloc() failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+
+/* End of general functions. */
+
+
 /* class List: */
 
     /* The list has two border-nodes "first" and "last", that aren't used
@@ -34,9 +49,9 @@
     */
 
     struct List *List_init(void) {
-        struct List *self        = malloc(sizeof(struct List));
-        self->first              = malloc(sizeof(struct ListNode));
-        self->last               = malloc(sizeof(struct ListNode));
+        struct List *self        = mymalloc(sizeof(struct List));
+        self->first              = mymalloc(sizeof(struct ListNode));
+        self->last               = mymalloc(sizeof(struct ListNode));
         self->last->next         = NULL;
         self->first->previous    = NULL;
         self->first->next        = self->last;
@@ -48,13 +63,13 @@
 
     void List_append(struct List *self, int payloadtype, void *payload) {
         /* Creating a new node: */
-        struct ListNode *newnode   = malloc(sizeof(struct ListNode));
+        struct ListNode *newnode   = mymalloc(sizeof(struct ListNode));
         newnode->payloadtype       = payloadtype;
         if (payloadtype == type_int) {
             newnode->payload = (int *) payload;
         }
         if (payloadtype == type_string) {
-            newnode->payload = malloc(strlen(payload) + 1);
+            newnode->payload = mymalloc(strlen(payload) + 1);
             strcpy(newnode->payload, payload);
         }
         /* Connecting the nodes: */
@@ -93,7 +108,7 @@
            We need the length of the list (llen),
            the number of characters of the final string (slen)
            and the number characters of the largest element (maxlen). */
-        int *result = malloc(3 * sizeof(int));
+        int *result = mymalloc(3 * sizeof(int));
         int llen   = 0;
         int slen   = 0;
         int maxlen = 0;
@@ -139,8 +154,8 @@
         int slen   = result[1];
         int maxlen = result[2];
         free(result);
-        char *s = malloc(slen);
-        char *payloadstring = malloc(maxlen + 1);
+        char *s = mymalloc(slen);
+        char *payloadstring = mymalloc(maxlen + 1);
         int n = 0;
         self->current = self->first->next;
         strcpy(s, "[");
@@ -181,4 +196,3 @@
     }
 
 /* End of class List. */
-

@@ -4,7 +4,7 @@
 #include "linkedlist.h"
 
 /*
-    linkedlistexample 0.1 - Trying to implement a linked list.
+    linkedlistexample 0.2 - Trying to implement a linked list.
 
     Copyright (C) 2023 Hauke Lubenow
 
@@ -44,4 +44,5 @@ int main(void) {
     printf("The payload of the removed element is: \"%s\".\n", n->payload);
     free(n);
     List_destruct(l);
+    return EXIT_SUCCESS;
 }
