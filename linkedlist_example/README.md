@@ -1,4 +1,4 @@
-#### linkedlistexample 0.1
+#### linkedlistexample 0.2
 
 My attempt to implement a doubly linked list in C.
 
