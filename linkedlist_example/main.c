@@ -4,7 +4,7 @@
 #include "linkedlist.h"
 
 /*
-    linkedlistexample 0.2 - Trying to implement a linked list.
+    linkedlistexample 0.3 - Trying to implement a linked list.
 
     Copyright (C) 2023 Hauke Lubenow
 
@@ -23,26 +23,48 @@
 */
 
 int main(void) {
-    struct List *l = List_init();
+    struct List *l1 = List_init();
     int a = 3;
     int b = 6;
 
     puts("Adding three elements.");
-    List_append(l, type_int, &a);
-    printf("The length of the list is now: %d\n", List_len(l));
-    List_append(l, type_int, &b);
-    printf("The length of the list is now: %d\n", List_len(l));
-    List_append(l, type_string, "Hello");
-    printf("The length of the list is now: %d\n", List_len(l));
-    List_print(l);
+    List_append(l1, type_int, &a);
+    printf("The length of the list is now: %d\n", List_len(l1));
+    List_append(l1, type_int, &b);
+    printf("The length of the list is now: %d\n", List_len(l1));
+    char *h = mymalloc(10);
+    strcpy(h, "Hello");
+    List_append(l1, type_string, h);
+    printf("The length of the list is now: %d\n", List_len(l1));
+    List_print(l1);
 
     puts("Removing one element.");
-    struct ListNode *n = List_pop(l);
-    List_print(l);
-    printf("The length of the list is now: %d\n", List_len(l));
-
-    printf("The payload of the removed element is: \"%s\".\n", n->payload);
-    free(n);
-    List_destruct(l);
+    struct ListNode *ln = List_pop(l1);
+    List_print(l1);
+    printf("The length of the list is now: %d\n", List_len(l1));
+    printf("The payload of the removed element is: \"%s\".\n", ln->payloadstring);
+    puts("Adding \"Hello\" again:");
+    List_append(l1, type_string, h);
+    puts("Creating a second list and appending it to the first:");
+    struct List *l2 = List_init();
+    int c[] = {7, 8, 9};
+    int i;
+    for (i = 0; i < 3; i++) {
+        List_append(l2, type_int, &(c[i]));
+    }
+    List_print(l2);
+    List_append(l1, type_list, l2);
+    List_print(l1);
+    puts("Removing everything:");
+    while (List_len(l1) > 0) {
+        ln = List_pop(l1);
+        printf("Removed: ");
+        printPayloadString(ln);
+        List_print(l1);
+    }
+    free(h);
+    free(ln);
+    List_destruct(l2);
+    List_destruct(l1);
     return EXIT_SUCCESS;
 }

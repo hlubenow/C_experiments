@@ -1,5 +1,5 @@
 /*
-    linkedlistexample 0.2 - Trying to implement a linked list.
+    linkedlistexample 0.3 - Trying to implement a linked list.
 
     Copyright (C) 2023 Hauke Lubenow
 
@@ -17,10 +17,38 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef generalfunction_headers
-    #define generalfunction_headers
+#ifndef general_headers
+    #define general_headers
+
+    #define MAXNUMCHARS 30
 
     void *mymalloc(size_t s);
+    void *myrealloc(void *p, size_t s);
+
+#endif
+
+#ifndef listnode_headers
+    #define listnode_headers
+
+    enum datatypes { type_none = -1, type_int, type_string, type_list };
+
+    /* Headers class ListNode: */
+
+        struct ListNode {
+            struct ListNode *previous;
+            struct ListNode *next;
+            int payloadtype;
+            void *payload;
+            char *payloadstring;
+        };
+
+        struct ListNode *ListNode_init(void);
+        int getPayloadStringSize(struct ListNode *self);
+        void updatePayloadString(struct ListNode *self);
+        void printPayloadString(struct ListNode *self);
+
+
+    /* End of headers class ListNode. */
 
 #endif
 
@@ -28,28 +56,21 @@
 #ifndef list_headers
     #define list_headers
 
-    enum datatypes { type_none = -1, type_int, type_string };
-
     /* Headers class List: */
-
-        struct ListNode {
-            struct ListNode *previous;
-            struct ListNode *next;
-            int payloadtype;
-            void *payload;
-        };
 
         struct List {
             struct ListNode *first;
             struct ListNode *last;
             struct ListNode *current;
+            char *printstring;
         };
 
         struct List *List_init(void);
         void List_append(struct List *self, int payloadtype, void *payload);
         struct ListNode *List_pop(struct List *self);
         int List_len(struct List *self);
-        int *List_getBytesForPrinting(struct List *self);
+        int *getPrintstringSize(struct List *self);
+        void List_updatePrintString(struct List *self);
         void List_print(struct List *self);
         void List_destruct(struct List *self);
    

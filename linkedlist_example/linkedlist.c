@@ -4,7 +4,7 @@
 #include "linkedlist.h"
 
 /*
-    linkedlistexample 0.2 - Trying to implement a doubly linked list.
+    linkedlistexample 0.3 - Trying to implement a doubly linked list.
 
     Copyright (C) 2023 Hauke Lubenow
 
@@ -34,12 +34,69 @@ void *mymalloc(size_t s) {
     return p;
 }
 
+void *myrealloc(void *p, size_t s) {
+    /* Just doing realloc(), and checking for success. */
+    p = realloc(p, s);
+    if (p == NULL) {
+        fprintf(stderr, "Warning: realloc() failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    return p;
+}
+
 /* End of general functions. */
+
+/* class ListNode: */
+
+    struct ListNode *ListNode_init(void) {
+        struct ListNode *self = mymalloc(sizeof(struct ListNode));
+        self->payloadstring   = NULL;
+    }
+
+    int getPayloadStringSize(struct ListNode *self) {
+        if (self->payloadtype == type_int) {
+            char num[MAXNUMCHARS];
+            sprintf(num, "%d", *((int *) self->payload));
+            return strlen(num) + 1;
+        }
+        if (self->payloadtype == type_string) {
+            return strlen((char *) self->payload) + 1;
+        }
+        if (self->payloadtype == type_list) {
+            struct List *l = (struct List *) self->payload;
+            return strlen(l->printstring) + 1;
+        }
+    }
+
+    void updatePayloadString(struct ListNode *self) {
+        if (self->payloadstring == NULL) {
+            self->payloadstring = mymalloc(getPayloadStringSize(self));
+        } else {
+            self->payloadstring = myrealloc(self->payloadstring, getPayloadStringSize(self));
+        }
+        if (self->payloadtype == type_int) {
+            sprintf(self->payloadstring, "%d", *((int *) self->payload));
+        } else if (self->payloadtype == type_string) {
+            sprintf(self->payloadstring, "%s", (char *) self->payload);
+        } else if (self->payloadtype == type_list) {
+            struct List *l = (struct List *) self->payload;
+            sprintf(self->payloadstring, "%s", l->printstring);
+        }
+    }
+
+    void printPayloadString(struct ListNode *self) {
+        updatePayloadString(self);
+        printf("%s\n", self->payloadstring);
+    }
+
+
+/* End of class ListNode. */
 
 
 /* class List: */
 
-    /* The list has two border-nodes "first" and "last", that aren't used
+    /* The list's nodes are implemented as ListNode-objects.
+       The list has two border-nodes "first" and "last", that aren't used
        for payload. The payload-nodes are created between the border-nodes.
        Beyond the two border-nodes, there is NULL.
        So the list looks like this:
@@ -50,27 +107,31 @@ void *mymalloc(size_t s) {
 
     struct List *List_init(void) {
         struct List *self        = mymalloc(sizeof(struct List));
-        self->first              = mymalloc(sizeof(struct ListNode));
-        self->last               = mymalloc(sizeof(struct ListNode));
+        self->first              = ListNode_init();
+        self->last               = ListNode_init();
         self->last->next         = NULL;
         self->first->previous    = NULL;
         self->first->next        = self->last;
         self->last->previous     = self->first;
         self->first->payloadtype = type_none;
         self->last->payloadtype  = type_none;
+        self->printstring        = NULL;
+        List_updatePrintString(self);
         return self;
     }
 
     void List_append(struct List *self, int payloadtype, void *payload) {
         /* Creating a new node: */
-        struct ListNode *newnode   = mymalloc(sizeof(struct ListNode));
+        struct ListNode *newnode   = ListNode_init();
         newnode->payloadtype       = payloadtype;
         if (payloadtype == type_int) {
             newnode->payload = (int *) payload;
         }
         if (payloadtype == type_string) {
-            newnode->payload = mymalloc(strlen(payload) + 1);
-            strcpy(newnode->payload, payload);
+            newnode->payload = (char *) payload;
+        }
+        if (payloadtype == type_list) {
+            newnode->payload = (struct List *) payload;
         }
         /* Connecting the nodes: */
         self->current        = self->last->previous;
@@ -78,18 +139,20 @@ void *mymalloc(size_t s) {
         newnode->previous    = self->current;
         self->last->previous = newnode;
         self->current->next  = newnode;
+        List_updatePrintString(self);
     }
 
     struct ListNode *List_pop(struct List *self) {
         self->current = self->last->previous;
-        if (self->current->previous == self->first) {
-            puts("Can't pop empty list.");
+        /* Empty list: */
+        if (self->current == self->first) {
             return NULL;
         }
         struct ListNode *expiringnode = self->current;
         self->current                 = self->current->previous;
         self->current->next           = self->last;
         self->last->previous          = self->current;
+        List_updatePrintString(self);
         return expiringnode;
     }
 
@@ -103,82 +166,57 @@ void *mymalloc(size_t s) {
         return llen;
     }
 
-    int *List_getBytesForPrinting(struct List *self) {
-        /* Calculating the bytes for reserving memory with malloc():
-           We need the length of the list (llen),
-           the number of characters of the final string (slen)
-           and the number characters of the largest element (maxlen). */
-        int *result = mymalloc(3 * sizeof(int));
-        int llen   = 0;
-        int slen   = 0;
-        int maxlen = 0;
-        char s[20];
-        int pllen;
+    int *getPrintstringSize(struct List *self) {
+        /* Calculating the memory for the printstring (data[1]).
+           Also, the length of the list (data[0]) is returned. */
+        int *data = mymalloc(2);
+        data[0] = 0;
+        /* 3, because of "[]\0": */
+        data[1] = 3;
         self->current = self->first->next;
         while (self->current != self->last) {
-            llen++;
-            if (self->current->payloadtype == type_int) {
-                sprintf(s, "%d",*((int *) self->current->payload));
-                pllen = strlen(s);
-                if (pllen > maxlen) {
-                    maxlen = pllen;
-                }
-                slen += pllen;
-                /* Two more for ', ':*/
-                slen += 2;
-            }
-            if (self->current->payloadtype == type_string) {
-                pllen = strlen((char *) self->current->payload);
-                if (pllen > maxlen) {
-                    maxlen = pllen;
-                }
-                slen += pllen;
-                /* Two more for ', ':*/
-                slen += 2;
-                /* Two more for '""':*/
-                slen += 2;
-            }
+            data[0]++;
+            updatePayloadString(self->current);
+            data[1] += strlen(self->current->payloadstring);
+            /* 2, because of ", ": */
+            data[1] += 2;
             self->current = self->current->next;
         }
-        /* Three more for "[]\0":*/
-        slen += 3;
-        result[0] = llen;
-        result[1] = slen;
-        result[2] = maxlen;
-        return result;
+        return data;
     }
 
-    void List_print(struct List *self) {
-        int *result = List_getBytesForPrinting(self);
-        int llen   = result[0];
-        int slen   = result[1];
-        int maxlen = result[2];
-        free(result);
-        char *s = mymalloc(slen);
-        char *payloadstring = mymalloc(maxlen + 1);
+    void List_updatePrintString(struct List *self) {
+        int *data = getPrintstringSize(self);
+        if (self->printstring == NULL) {
+            self->printstring = mymalloc(data[1]);
+        } else {
+            self->printstring = myrealloc(self->printstring, data[1]);
+        }
         int n = 0;
         self->current = self->first->next;
-        strcpy(s, "[");
+        strcpy(self->printstring, "[");
         while (self->current != self->last) {
-            if (self->current->payloadtype == type_int) {
-                sprintf(payloadstring, "%d", *((int *) self->current->payload));
-            }
+            updatePayloadString(self->current);
             if (self->current->payloadtype == type_string) {
-                strcpy(payloadstring, "\"");
-                strcat(payloadstring, (char *) self->current->payload);
-                strcat(payloadstring, "\"");
+                strcat(self->printstring, "\"");
             }
-            strcat(s, payloadstring);
-            if (n < llen - 1) {
-                strcat(s, ", ");
+            strcat(self->printstring, self->current->payloadstring);
+            if (self->current->payloadtype == type_string) {
+                strcat(self->printstring, "\"");
+            }
+            /* "data[0]" is the length of the list (llen): */
+            if (n < data[0] - 1) {
+                strcat(self->printstring, ", ");
             }
             n++;
             self->current = self->current->next;
         }
-        strcat(s, "]");
-        printf("%s\n", s);
-        free(s);
-        free(payloadstring);
+        strcat(self->printstring, "]");
+        free(data);
+    }
+
+    void List_print(struct List *self) {
+        printf("%s\n", self->printstring);
     }
 
     void List_destruct(struct List *self) {
@@ -186,12 +224,17 @@ void *mymalloc(size_t s) {
         self->current = self->first;
         while (self->current->next != NULL) {
             temp = self->current;
+            if (temp->payloadtype == type_list) {
+                List_destruct(temp->payload);
+            }
             if (temp->payloadtype == type_string) {
                 free(temp->payload);
             }
+            free(temp->payloadstring);
             free(temp);
             self->current = self->current->next;
         }
+        free(self->printstring);
         free(self);
     }
 
