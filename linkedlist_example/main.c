@@ -59,7 +59,7 @@ int main(void) {
     while (List_len(l1) > 0) {
         ln = List_pop(l1);
         printf("Removed: ");
-        printPayloadString(ln);
+        ListNode_printPayloadString(ln);
         List_print(l1);
     }
     free(h);

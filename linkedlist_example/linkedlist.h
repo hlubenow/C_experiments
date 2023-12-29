@@ -43,10 +43,9 @@
         };
 
         struct ListNode *ListNode_init(void);
-        int getPayloadStringSize(struct ListNode *self);
-        void updatePayloadString(struct ListNode *self);
-        void printPayloadString(struct ListNode *self);
-
+        int ListNode_getPayloadStringSize(struct ListNode *self);
+        void ListNode_updatePayloadString(struct ListNode *self);
+        void ListNode_printPayloadString(struct ListNode *self);
 
     /* End of headers class ListNode. */
 
@@ -69,7 +68,7 @@
         void List_append(struct List *self, int payloadtype, void *payload);
         struct ListNode *List_pop(struct List *self);
         int List_len(struct List *self);
-        int *getPrintstringSize(struct List *self);
+        int *List_getPrintstringSize(struct List *self);
         void List_updatePrintString(struct List *self);
         void List_print(struct List *self);
         void List_destruct(struct List *self);

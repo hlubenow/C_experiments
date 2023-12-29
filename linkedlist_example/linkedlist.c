@@ -53,7 +53,7 @@ void *myrealloc(void *p, size_t s) {
         self->payloadstring   = NULL;
     }
 
-    int getPayloadStringSize(struct ListNode *self) {
+    int ListNode_getPayloadStringSize(struct ListNode *self) {
         if (self->payloadtype == type_int) {
             char num[MAXNUMCHARS];
             sprintf(num, "%d", *((int *) self->payload));
@@ -68,11 +68,11 @@ void *myrealloc(void *p, size_t s) {
         }
     }
 
-    void updatePayloadString(struct ListNode *self) {
+    void ListNode_updatePayloadString(struct ListNode *self) {
         if (self->payloadstring == NULL) {
-            self->payloadstring = mymalloc(getPayloadStringSize(self));
+            self->payloadstring = mymalloc(ListNode_getPayloadStringSize(self));
         } else {
-            self->payloadstring = myrealloc(self->payloadstring, getPayloadStringSize(self));
+            self->payloadstring = myrealloc(self->payloadstring, ListNode_getPayloadStringSize(self));
         }
         if (self->payloadtype == type_int) {
             sprintf(self->payloadstring, "%d", *((int *) self->payload));
@@ -84,8 +84,8 @@ void *myrealloc(void *p, size_t s) {
         }
     }
 
-    void printPayloadString(struct ListNode *self) {
-        updatePayloadString(self);
+    void ListNode_printPayloadString(struct ListNode *self) {
+        ListNode_updatePayloadString(self);
         printf("%s\n", self->payloadstring);
     }
 
@@ -166,7 +166,7 @@ void *myrealloc(void *p, size_t s) {
         return llen;
     }
 
-    int *getPrintstringSize(struct List *self) {
+    int *List_getPrintstringSize(struct List *self) {
         /* Calculating the memory for the printstring (data[1]).
            Also, the length of the list (data[0]) is returned. */
         int *data = mymalloc(2);
@@ -176,7 +176,7 @@ void *myrealloc(void *p, size_t s) {
         self->current = self->first->next;
         while (self->current != self->last) {
             data[0]++;
-            updatePayloadString(self->current);
+            ListNode_updatePayloadString(self->current);
             data[1] += strlen(self->current->payloadstring);
             /* 2, because of ", ": */
             data[1] += 2;
@@ -186,7 +186,7 @@ void *myrealloc(void *p, size_t s) {
     }
 
     void List_updatePrintString(struct List *self) {
-        int *data = getPrintstringSize(self);
+        int *data = List_getPrintstringSize(self);
         if (self->printstring == NULL) {
             self->printstring = mymalloc(data[1]);
         } else {
@@ -196,7 +196,7 @@ void *myrealloc(void *p, size_t s) {
         self->current = self->first->next;
         strcpy(self->printstring, "[");
         while (self->current != self->last) {
-            updatePayloadString(self->current);
+            ListNode_updatePayloadString(self->current);
             if (self->current->payloadtype == type_string) {
                 strcat(self->printstring, "\"");
             }
