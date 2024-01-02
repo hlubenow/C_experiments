@@ -1,5 +1,5 @@
 /*
-    linkedlistexample 0.3 - Trying to implement a linked list.
+    linkedlistexample 0.4 - Trying to implement a linked list.
 
     Copyright (C) 2023 Hauke Lubenow
 
@@ -20,11 +20,19 @@
 #ifndef general_headers
     #define general_headers
 
+    enum bool {False, True};
+    enum none {None};
+
     #define MAXNUMCHARS 30
 
     void *mymalloc(size_t s);
     void *myrealloc(void *p, size_t s);
 
+#endif
+
+#ifndef stringfunc_headers
+    #define stringfunc_headers
+    struct List *split(char *separator, char *text);
 #endif
 
 #ifndef listnode_headers
@@ -43,10 +51,11 @@
         };
 
         struct ListNode *ListNode_init(void);
+        void ListNode_setPayload(struct ListNode *self, int payloadtype, void *payload);
         int ListNode_getPayloadStringSize(struct ListNode *self);
         void ListNode_updatePayloadString(struct ListNode *self);
         void ListNode_printPayloadString(struct ListNode *self);
-
+        void ListNode_destruct(struct ListNode *self, enum bool freepayload);
     /* End of headers class ListNode. */
 
 #endif
@@ -66,12 +75,16 @@
 
         struct List *List_init(void);
         void List_append(struct List *self, int payloadtype, void *payload);
+        void List_appendString(struct List *self, char *s);
+        void List_unshift(struct List *self, int payloadtype, void *payload);
+        void List_unshiftString(struct List *self, char *s);
         struct ListNode *List_pop(struct List *self);
+        void List_Redefine(struct List *self, int number, int newpayloadtype, void *newpayload);
         int List_len(struct List *self);
         int *List_getPrintstringSize(struct List *self);
         void List_updatePrintString(struct List *self);
         void List_print(struct List *self);
-        void List_destruct(struct List *self);
+        void List_destruct(struct List *self, enum bool freepayload);
    
     /* End of headers class List. */
 

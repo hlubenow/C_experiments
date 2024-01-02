@@ -4,7 +4,7 @@
 #include "linkedlist.h"
 
 /*
-    linkedlistexample 0.3 - Trying to implement a linked list.
+    linkedlistexample 0.4 - Trying to implement a linked list.
 
     Copyright (C) 2023 Hauke Lubenow
 
@@ -24,17 +24,15 @@
 
 int main(void) {
     struct List *l1 = List_init();
-    int a = 3;
-    int b = 6;
-
     puts("Adding three elements.");
-    List_append(l1, type_int, &a);
+    int a[] = {1, 2, 3};
+    int i;
+    for (i = 0; i < 3; i++) {
+        List_append(l1, type_int, &(a[i]));
+    }
+ 
     printf("The length of the list is now: %d\n", List_len(l1));
-    List_append(l1, type_int, &b);
-    printf("The length of the list is now: %d\n", List_len(l1));
-    char *h = mymalloc(10);
-    strcpy(h, "Hello");
-    List_append(l1, type_string, h);
+    List_appendString(l1, "Hello");
     printf("The length of the list is now: %d\n", List_len(l1));
     List_print(l1);
 
@@ -42,19 +40,29 @@ int main(void) {
     struct ListNode *ln = List_pop(l1);
     List_print(l1);
     printf("The length of the list is now: %d\n", List_len(l1));
-    printf("The payload of the removed element is: \"%s\".\n", ln->payloadstring);
+    puts("The payload of the removed element is:");
+    ListNode_printPayloadString(ln);
     puts("Adding \"Hello\" again:");
-    List_append(l1, type_string, h);
+    List_appendString(l1, "Hello");
+
     puts("Creating a second list and appending it to the first:");
     struct List *l2 = List_init();
-    int c[] = {7, 8, 9};
-    int i;
+    int b[] = {4, 5, 6};
     for (i = 0; i < 3; i++) {
-        List_append(l2, type_int, &(c[i]));
+        List_append(l2, type_int, &(b[i]));
     }
     List_print(l2);
     List_append(l1, type_list, l2);
     List_print(l1);
+
+    char *s = mymalloc(10);
+    strcpy(s, "Welt");
+    List_Redefine(l1, 3, type_string, s);
+    List_print(l1);
+
+    List_unshiftString(l1, "Test");
+    List_print(l1);
+
     puts("Removing everything:");
     while (List_len(l1) > 0) {
         ln = List_pop(l1);
@@ -62,9 +70,15 @@ int main(void) {
         ListNode_printPayloadString(ln);
         List_print(l1);
     }
-    free(h);
+ 
+    free(s);
     free(ln);
-    List_destruct(l2);
-    List_destruct(l1);
+    List_destruct(l1, True);
+
+    puts("\n\"abconeabctwoabcthreeabcfourabc\" is split at \"abc\" to:");
+    struct List *l = split("abc", "abconeabctwoabcthreeabcfourabc");
+    List_print(l);
+    List_destruct(l, True);
+
     return EXIT_SUCCESS;
 }

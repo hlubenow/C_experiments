@@ -4,7 +4,7 @@
 #include "linkedlist.h"
 
 /*
-    linkedlistexample 0.3 - Trying to implement a doubly linked list.
+    linkedlistexample 0.4 - Trying to implement a doubly linked list.
 
     Copyright (C) 2023 Hauke Lubenow
 
@@ -46,11 +46,65 @@ void *myrealloc(void *p, size_t s) {
 
 /* End of general functions. */
 
+/* String functions. */
+
+struct List *split(char *separator, char *text) {
+   char *s = malloc(strlen(text) + 1);
+   struct List *l = List_init();
+   strcpy(s, text);
+   char *p;
+   int i, u;
+   int slen = strlen(s);
+   int seplen = strlen(separator);
+   if (seplen > slen) {
+       puts("Warning: Splitstring larger than mainstring.");
+   }
+   int found = 0;
+   int startpoint = 0;
+   p = s;
+   for (i = 0; i <= slen; i++) {
+       found = 1;
+       for (u = 0; u < seplen; u++) {
+           /* separator not at "s[i] ... s[i + seplen]": */
+           if (s[i + u] != separator[u]) {
+               found = 0;
+               break;
+           }
+       }
+       if (found || s[i] == '\0') {
+           s[i] = '\0';
+           List_appendString(l, p);
+           startpoint = i + seplen;
+           if (startpoint <= slen) {
+               p = s + startpoint;
+           }
+       }
+    }
+    free(s);
+    return l;
+}
+
+/* End of string functions. */
+
+
 /* class ListNode: */
 
     struct ListNode *ListNode_init(void) {
         struct ListNode *self = mymalloc(sizeof(struct ListNode));
         self->payloadstring   = NULL;
+    }
+
+    void ListNode_setPayload(struct ListNode *self, int payloadtype, void *payload) {
+        self->payloadtype = payloadtype;
+        if (self->payloadtype == type_int) {
+            self->payload = (int *) payload;
+        }
+        if (self->payloadtype == type_string) {
+            self->payload = (char *) payload;
+        }
+        if (self->payloadtype == type_list) {
+            self->payload = (struct List *) payload;
+        }
     }
 
     int ListNode_getPayloadStringSize(struct ListNode *self) {
@@ -89,6 +143,16 @@ void *myrealloc(void *p, size_t s) {
         printf("%s\n", self->payloadstring);
     }
 
+    void ListNode_destruct(struct ListNode *self, enum bool freepayload) {
+        if (self->payloadtype == type_list && freepayload == True) {
+            List_destruct(self->payload, True);
+        }
+        if (self->payloadtype == type_string && freepayload == True) {
+            free(self->payload);
+        }
+        free(self->payloadstring);
+        free(self);
+    }
 
 /* End of class ListNode. */
 
@@ -122,17 +186,9 @@ void *myrealloc(void *p, size_t s) {
 
     void List_append(struct List *self, int payloadtype, void *payload) {
         /* Creating a new node: */
-        struct ListNode *newnode   = ListNode_init();
-        newnode->payloadtype       = payloadtype;
-        if (payloadtype == type_int) {
-            newnode->payload = (int *) payload;
-        }
-        if (payloadtype == type_string) {
-            newnode->payload = (char *) payload;
-        }
-        if (payloadtype == type_list) {
-            newnode->payload = (struct List *) payload;
-        }
+        struct ListNode *newnode = ListNode_init();
+        ListNode_setPayload(newnode, payloadtype, payload);
+
         /* Connecting the nodes: */
         self->current        = self->last->previous;
         newnode->next        = self->last;
@@ -140,6 +196,35 @@ void *myrealloc(void *p, size_t s) {
         self->last->previous = newnode;
         self->current->next  = newnode;
         List_updatePrintString(self);
+    }
+
+    void List_appendString(struct List *self, char *s) {
+        /* Appending a string to the list, including allocating memory for it. */
+        int s2mem = strlen(s) + 1;
+        char *s2 = mymalloc(s2mem);
+        strcpy(s2, s);
+        List_append(self, type_string, (void *) s2);
+    }
+
+    void List_unshift(struct List *self, int payloadtype, void *payload) {
+        /* Creating a new node: */
+        struct ListNode *newnode = ListNode_init();
+        ListNode_setPayload(newnode, payloadtype, payload);
+
+        /* Connecting the nodes: */
+        self->current           = self->first->next;
+        newnode->previous       = self->first;
+        newnode->next           = self->current;
+        self->first->next       = newnode;
+        self->current->previous = newnode;
+        List_updatePrintString(self);
+    }
+
+    void List_unshiftString(struct List *self, char *s) {
+        /* Appending a string at the beginning of the list, including allocating memory for it. */
+        char *s2 = mymalloc(strlen(s) + 1);
+        strcpy(s2, s);
+        List_unshift(self, type_string, (void *) s2);
     }
 
     struct ListNode *List_pop(struct List *self) {
@@ -154,6 +239,21 @@ void *myrealloc(void *p, size_t s) {
         self->last->previous          = self->current;
         List_updatePrintString(self);
         return expiringnode;
+    }
+
+    void List_Redefine(struct List *self, int number, int newpayloadtype, void *newpayload) {
+        int i;
+        if (number < 0 || number > (List_len(self) - 1)) {
+            printf("Warning: Number %d out of range. Not possible to redefine list element.\n", number);
+            return;
+        }
+        self->current = self->first->next;
+        for (i = 0; i < number; i++) {
+            self->current = self->current->next;
+        }
+        self->current->payloadtype = newpayloadtype;
+        self->current->payload     = newpayload;
+        List_updatePrintString(self);
     }
 
     int List_len(struct List *self) {
@@ -178,10 +278,16 @@ void *myrealloc(void *p, size_t s) {
             data[0]++;
             ListNode_updatePayloadString(self->current);
             data[1] += strlen(self->current->payloadstring);
+            if (self->current->payloadtype == type_string) {
+                /* 2, because of "''" : */
+                data[1] += 2;
+            }
             /* 2, because of ", ": */
             data[1] += 2;
             self->current = self->current->next;
         }
+        /* Just in case ... : */
+        // data[1] += 50;
         return data;
     }
 
@@ -198,11 +304,11 @@ void *myrealloc(void *p, size_t s) {
         while (self->current != self->last) {
             ListNode_updatePayloadString(self->current);
             if (self->current->payloadtype == type_string) {
-                strcat(self->printstring, "\"");
+                strcat(self->printstring, "'");
             }
             strcat(self->printstring, self->current->payloadstring);
             if (self->current->payloadtype == type_string) {
-                strcat(self->printstring, "\"");
+                strcat(self->printstring, "'");
             }
             /* "data[0]" is the length of the list (llen): */
             if (n < data[0] - 1) {
@@ -219,20 +325,13 @@ void *myrealloc(void *p, size_t s) {
         printf("%s\n", self->printstring);
     }
 
-    void List_destruct(struct List *self) {
+    void List_destruct(struct List *self, enum bool freepayload) {
         struct ListNode *temp;
         self->current = self->first;
         while (self->current->next != NULL) {
             temp = self->current;
-            if (temp->payloadtype == type_list) {
-                List_destruct(temp->payload);
-            }
-            if (temp->payloadtype == type_string) {
-                free(temp->payload);
-            }
-            free(temp->payloadstring);
-            free(temp);
             self->current = self->current->next;
+            ListNode_destruct(temp, freepayload);
         }
         free(self->printstring);
         free(self);
