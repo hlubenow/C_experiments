@@ -6,7 +6,10 @@
 /*
     linkedlistexample 0.4 - Trying to implement a doubly linked list.
 
-    Copyright (C) 2023 Hauke Lubenow
+    Comment on video/song "Write in C" ( https://www.youtube.com/watch?v=1S1fISh-pag ) :
+    @predatortheme: "First thing to do in C is implement a dynamic list and String wrapper. Lol :D"
+
+    Copyright (C) 2024 Hauke Lubenow
 
     This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -62,6 +65,7 @@ struct List *split(char *separator, char *text) {
    int found = 0;
    int startpoint = 0;
    p = s;
+   /* Needs to be "<=" here, to also get the last string: */
    for (i = 0; i <= slen; i++) {
        found = 1;
        for (u = 0; u < seplen; u++) {
@@ -96,45 +100,43 @@ struct List *split(char *separator, char *text) {
 
     void ListNode_setPayload(struct ListNode *self, int payloadtype, void *payload) {
         self->payloadtype = payloadtype;
-        if (self->payloadtype == type_int) {
-            self->payload = (int *) payload;
-        }
-        if (self->payloadtype == type_float) {
-            self->payload = (float *) payload;
-        }
-        if (self->payloadtype == type_double) {
-            self->payload = (double *) payload;
-        }
-        if (self->payloadtype == type_string) {
-            self->payload = (char *) payload;
-        }
-        if (self->payloadtype == type_list) {
-            self->payload = (struct List *) payload;
+        switch (self->payloadtype) {
+            case type_int:
+                self->payload = (int *) payload;
+                return;
+            case type_float:
+                self->payload = (float *) payload;
+                return;
+            case type_double:
+                self->payload = (double *) payload;
+                return;
+            case type_string:
+                self->payload = (char *) payload;
+                return;
+            case type_list:
+                self->payload = (struct List *) payload;
+                return;
         }
     }
 
     int ListNode_getPayloadStringSize(struct ListNode *self) {
-        if (self->payloadtype == type_int) {
-            char num[MAXNUMCHARS];
-            sprintf(num, "%d", *((int *) self->payload));
-            return strlen(num) + 1;
-        }
-        if (self->payloadtype == type_float) {
-            char num[MAXNUMCHARS];
-            sprintf(num, "%f", *((float *) self->payload));
-            return strlen(num) + 1;
-        }
-        if (self->payloadtype == type_double) {
-            char num[MAXNUMCHARS];
-            sprintf(num, "%f", *((double *) self->payload));
-            return strlen(num) + 1;
-        }
-        if (self->payloadtype == type_string) {
-            return strlen((char *) self->payload) + 1;
-        }
-        if (self->payloadtype == type_list) {
-            struct List *l = (struct List *) self->payload;
-            return strlen(l->printstring) + 1;
+        char num[MAXNUMCHARS];
+        switch (self->payloadtype) {
+            case type_int:
+                char num[MAXNUMCHARS];
+                sprintf(num, "%d", *((int *) self->payload));
+                return strlen(num) + 1;
+            case type_float:
+                sprintf(num, "%f", *((float *) self->payload));
+                return strlen(num) + 1;
+            case type_double:
+                sprintf(num, "%f", *((double *) self->payload));
+                return strlen(num) + 1;
+            case type_string:
+                return strlen((char *) self->payload) + 1;
+            case type_list:
+                struct List *l = (struct List *) self->payload;
+                return strlen(l->printstring) + 1;
         }
     }
 
@@ -144,17 +146,23 @@ struct List *split(char *separator, char *text) {
         } else {
             self->payloadstring = myrealloc(self->payloadstring, ListNode_getPayloadStringSize(self));
         }
-        if (self->payloadtype == type_int) {
-            sprintf(self->payloadstring, "%d", *((int *) self->payload));
-        } else if (self->payloadtype == type_float) {
-            sprintf(self->payloadstring, "%f", *((float *) self->payload));
-        } else if (self->payloadtype == type_double) {
-            sprintf(self->payloadstring, "%f", *((double *) self->payload));
-        } else if (self->payloadtype == type_string) {
-            sprintf(self->payloadstring, "%s", (char *) self->payload);
-        } else if (self->payloadtype == type_list) {
-            struct List *l = (struct List *) self->payload;
-            sprintf(self->payloadstring, "%s", l->printstring);
+        switch (self->payloadtype) {
+            case type_int:
+                sprintf(self->payloadstring, "%d", *((int *) self->payload));
+                return;
+            case type_float:
+                sprintf(self->payloadstring, "%f", *((float *) self->payload));
+                return;
+            case type_double:
+                sprintf(self->payloadstring, "%f", *((double *) self->payload));
+                return;
+            case type_string:
+                sprintf(self->payloadstring, "%s", (char *) self->payload);
+                return;
+            case type_list:
+                struct List *l = (struct List *) self->payload;
+                sprintf(self->payloadstring, "%s", l->printstring);
+                return;
         }
     }
 
@@ -321,7 +329,7 @@ struct List *split(char *separator, char *text) {
         strcpy(self->printstring, "[");
         while (self->current != self->last) {
             /* Already updated in "List_getPrintstringSize()": 
-                   ListNode_updatePayloadString(self->current);
+                // ListNode_updatePayloadString(self->current);
             */
             if (self->current->payloadtype == type_string) {
                 strcat(self->printstring, "'");

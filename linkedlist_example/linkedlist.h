@@ -1,7 +1,7 @@
 /*
     linkedlistexample 0.4 - Trying to implement a linked list.
 
-    Copyright (C) 2023 Hauke Lubenow
+    Copyright (C) 2024 Hauke Lubenow
 
     This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
