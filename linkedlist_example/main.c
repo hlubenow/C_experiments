@@ -6,6 +6,9 @@
 /*
     linkedlistexample 0.4 - Trying to implement a linked list.
 
+    Comment on "Write in C" ( https://www.youtube.com/watch?v=1S1fISh-pag ) :
+    @predatortheme: "First thing to do in C is implement a dynamic list and String wrapper. Lol :D"
+
     Copyright (C) 2023 Hauke Lubenow
 
     This program is free software: you can redistribute it and/or modify
@@ -30,6 +33,11 @@ int main(void) {
     for (i = 0; i < 3; i++) {
         List_append(l1, type_int, &(a[i]));
     }
+    float f = 32.567;
+    List_append(l1, type_float, &(f));
+    double d = 7632.1213;
+    List_append(l1, type_double, &(d));
+ 
  
     printf("The length of the list is now: %d\n", List_len(l1));
     List_appendString(l1, "Hello");

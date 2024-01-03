@@ -99,6 +99,12 @@ struct List *split(char *separator, char *text) {
         if (self->payloadtype == type_int) {
             self->payload = (int *) payload;
         }
+        if (self->payloadtype == type_float) {
+            self->payload = (float *) payload;
+        }
+        if (self->payloadtype == type_double) {
+            self->payload = (double *) payload;
+        }
         if (self->payloadtype == type_string) {
             self->payload = (char *) payload;
         }
@@ -111,6 +117,16 @@ struct List *split(char *separator, char *text) {
         if (self->payloadtype == type_int) {
             char num[MAXNUMCHARS];
             sprintf(num, "%d", *((int *) self->payload));
+            return strlen(num) + 1;
+        }
+        if (self->payloadtype == type_float) {
+            char num[MAXNUMCHARS];
+            sprintf(num, "%f", *((float *) self->payload));
+            return strlen(num) + 1;
+        }
+        if (self->payloadtype == type_double) {
+            char num[MAXNUMCHARS];
+            sprintf(num, "%f", *((double *) self->payload));
             return strlen(num) + 1;
         }
         if (self->payloadtype == type_string) {
@@ -130,6 +146,10 @@ struct List *split(char *separator, char *text) {
         }
         if (self->payloadtype == type_int) {
             sprintf(self->payloadstring, "%d", *((int *) self->payload));
+        } else if (self->payloadtype == type_float) {
+            sprintf(self->payloadstring, "%f", *((float *) self->payload));
+        } else if (self->payloadtype == type_double) {
+            sprintf(self->payloadstring, "%f", *((double *) self->payload));
         } else if (self->payloadtype == type_string) {
             sprintf(self->payloadstring, "%s", (char *) self->payload);
         } else if (self->payloadtype == type_list) {
@@ -286,8 +306,6 @@ struct List *split(char *separator, char *text) {
             data[1] += 2;
             self->current = self->current->next;
         }
-        /* Just in case ... : */
-        // data[1] += 50;
         return data;
     }
 
@@ -302,7 +320,9 @@ struct List *split(char *separator, char *text) {
         self->current = self->first->next;
         strcpy(self->printstring, "[");
         while (self->current != self->last) {
-            ListNode_updatePayloadString(self->current);
+            /* Already updated in "List_getPrintstringSize()": 
+                   ListNode_updatePayloadString(self->current);
+            */
             if (self->current->payloadtype == type_string) {
                 strcat(self->printstring, "'");
             }

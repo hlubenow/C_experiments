@@ -38,7 +38,7 @@
 #ifndef listnode_headers
     #define listnode_headers
 
-    enum datatypes { type_none = -1, type_int, type_string, type_list };
+    enum datatypes { type_none = -1, type_int, type_float, type_double, type_string, type_list };
 
     /* Headers class ListNode: */
 
