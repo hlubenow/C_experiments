@@ -4,7 +4,7 @@
 #include "linkedlist.h"
 
 /*
-    linkedlistexample 0.4 - Trying to implement a doubly linked list.
+    linkedlistexample 0.4.1 - Trying to implement a doubly linked list.
 
     Comment on video/song "Write in C" ( https://www.youtube.com/watch?v=1S1fISh-pag ) :
     @predatortheme: "First thing to do in C is implement a dynamic list and String wrapper. Lol :D"
@@ -52,40 +52,40 @@ void *myrealloc(void *p, size_t s) {
 /* String functions. */
 
 struct List *split(char *separator, char *text) {
-   char *s = malloc(strlen(text) + 1);
-   struct List *l = List_init();
-   strcpy(s, text);
-   char *p;
-   int i, u;
-   int slen = strlen(s);
-   int seplen = strlen(separator);
-   if (seplen > slen) {
-       puts("Warning: Splitstring larger than mainstring.");
-   }
-   int found = 0;
-   int startpoint = 0;
-   p = s;
-   /* Needs to be "<=" here, to also get the last string: */
-   for (i = 0; i <= slen; i++) {
-       found = 1;
-       for (u = 0; u < seplen; u++) {
-           /* separator not at "s[i] ... s[i + seplen]": */
-           if (s[i + u] != separator[u]) {
-               found = 0;
-               break;
-           }
-       }
-       if (found || s[i] == '\0') {
-           s[i] = '\0';
-           List_appendString(l, p);
-           startpoint = i + seplen;
-           if (startpoint <= slen) {
-               p = s + startpoint;
-           }
-       }
+    char *s = malloc(strlen(text) + 1);
+    struct List *l = List_init();
+    strcpy(s, text);
+    char *p;
+    int i, u;
+    int slen = strlen(s);
+    int seplen = strlen(separator);
+    if (seplen > slen) {
+        puts("Warning: Splitstring larger than mainstring.");
     }
-    free(s);
-    return l;
+    int found = 0;
+    int startpoint = 0;
+    p = s;
+    /* Needs to be "<=" here, to also get the last string: */
+    for (i = 0; i <= slen; i++) {
+        found = 1;
+        for (u = 0; u < seplen; u++) {
+            /* separator not at "s[i] ... s[i + seplen]": */
+            if (s[i + u] != separator[u]) {
+                found = 0;
+                break;
+            }
+        }
+        if (found || s[i] == '\0') {
+            s[i] = '\0';
+            List_appendString(l, p);
+            startpoint = i + seplen;
+            if (startpoint <= slen) {
+                p = s + startpoint;
+            }
+        }
+     }
+     free(s);
+     return l;
 }
 
 /* End of string functions. */
@@ -121,9 +121,9 @@ struct List *split(char *separator, char *text) {
 
     int ListNode_getPayloadStringSize(struct ListNode *self) {
         char num[MAXNUMCHARS];
+        struct List *l;
         switch (self->payloadtype) {
             case type_int:
-                char num[MAXNUMCHARS];
                 sprintf(num, "%d", *((int *) self->payload));
                 return strlen(num) + 1;
             case type_float:
@@ -135,12 +135,13 @@ struct List *split(char *separator, char *text) {
             case type_string:
                 return strlen((char *) self->payload) + 1;
             case type_list:
-                struct List *l = (struct List *) self->payload;
+                l = (struct List *) self->payload;
                 return strlen(l->printstring) + 1;
         }
     }
 
     void ListNode_updatePayloadString(struct ListNode *self) {
+        struct List *l;
         if (self->payloadstring == NULL) {
             self->payloadstring = mymalloc(ListNode_getPayloadStringSize(self));
         } else {
@@ -160,7 +161,7 @@ struct List *split(char *separator, char *text) {
                 sprintf(self->payloadstring, "%s", (char *) self->payload);
                 return;
             case type_list:
-                struct List *l = (struct List *) self->payload;
+                l = (struct List *) self->payload;
                 sprintf(self->payloadstring, "%s", l->printstring);
                 return;
         }
