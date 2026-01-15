@@ -1,5 +1,5 @@
 /*
-    linkedlistexample 0.4 - Trying to implement a linked list.
+    linkedlistexample 0.4.1 - Trying to implement a linked list.
 
     Copyright (C) 2024 Hauke Lubenow
 
