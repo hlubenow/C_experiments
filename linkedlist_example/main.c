@@ -4,7 +4,7 @@
 #include "linkedlist.h"
 
 /*
-    linkedlistexample 0.4 - Trying to implement a linked list.
+    linkedlistexample 0.4.1 - Trying to implement a linked list.
 
     Comment on "Write in C" ( https://www.youtube.com/watch?v=1S1fISh-pag ) :
     @predatortheme: "First thing to do in C is implement a dynamic list and String wrapper. Lol :D"
